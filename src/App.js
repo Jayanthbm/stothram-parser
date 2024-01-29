@@ -81,13 +81,13 @@ function App() {
       if (data[i][0].type === "subheading") {
         // Subheading
         jsonData.content.push({
-          type: "SubHeader",
+          type: "subheading",
           title: data[i][0].lines[0],
         });
       } else if (data[i][0].type === "paragraph") {
         // Paragraph
         let paragraph = {
-          type: "St",
+          type: "paragraph",
           lines: [],
         };
 
@@ -115,13 +115,13 @@ function App() {
     let tmp = [];
     for (let i = 0; i < jsonData.content.length; i++) {
       let tmp1 = [];
-      if (jsonData.content[i].type === "SubHeader") {
+      if (jsonData.content[i].type === "subheading") {
         tmp1.push({
           type: "subheading",
           lines: [jsonData.content[i].title],
         });
       }
-      if (jsonData.content[i].type === "St") {
+      if (jsonData.content[i].type === "paragraph") {
         tmp1.push({
           type: "paragraph",
           lines: jsonData.content[i].lines,
@@ -141,8 +141,8 @@ function App() {
 
   const isValidJson = (jsonData) => {
     const VALIDTYPES = {
-      St: true,
-      SubHeader: true,
+      paragraph: true,
+      subheading: true,
     };
 
     try {
