@@ -5,9 +5,17 @@ const EditView = ({ data, setData }) => {
   const [showGenerated, setShowGenerated] = useState(false);
 
   const reset = () => {
-    setGenerated(null);
+    setGenerated({
+      title: "",
+      content: [],
+    });
     setShowGenerated(false);
-    setData(null);
+    setData({
+      title: "",
+      content: [],
+    });
+    localStorage.removeItem("stothramData");
+    localStorage.removeItem("stothramDataSaved");
   };
 
   const generateCode = (jsonData) => {
@@ -243,7 +251,7 @@ const EditView = ({ data, setData }) => {
           {item.type === "paragraph" ? (
             <>
               {item.lines.map((line, lineIndex) => (
-                <div key={lineIndex} style={{ display: "flex" }}>
+                <div key={lineIndex} style={{ display: "flex", marginTop: 5 }}>
                   <input
                     type="text"
                     className="w3-input"
@@ -297,6 +305,7 @@ const EditView = ({ data, setData }) => {
               onClick={() => {
                 newSubheading(index);
               }}
+              style={{ marginRight: 10 }}
             >
               New Subheading
             </button>
@@ -305,7 +314,6 @@ const EditView = ({ data, setData }) => {
               onClick={() => {
                 newParagraph(index);
               }}
-              style={{ marginRight: 10 }}
             >
               New Paragraph
             </button>

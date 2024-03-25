@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from "react";
-import ImportView from "./ImportView";
+import React, { useState } from "react";
 import EditView from "./EditView";
+import ImportView from "./ImportView";
 import ReaderView from "./ReaderView";
 
 const VIEWS = {
@@ -78,7 +78,6 @@ const isValidJson = (jsonData) => {
 };
 
 function App() {
-  const [loading, setLoading] = useState(false);
   const [view, setView] = useState(VIEWS.IMPORT);
   const [data, setData] = useState({
     title: "",
