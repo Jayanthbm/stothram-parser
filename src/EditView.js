@@ -1,20 +1,20 @@
-import React from "react";
+import React, { useState } from "react";
 
-const EditView = ({
-  data,
-  generated,
-  showGenerated,
-  title,
-  updateLine,
-  newLine,
-  deleteLine,
-  newParagraph,
-  deleteParagraph,
-  newSubheading,
-  generateCode,
-  reset,
-  setTitle,
-}) => {
+const EditView = ({ data, setData }) => {
+  const [generated, setGenerated] = useState([]);
+  const [showGenerated, setShowGenerated] = useState(false);
+
+  const reset = () => {
+    setGenerated(null);
+    setShowGenerated(false);
+    setData(null);
+  };
+
+  const generateCode = (jsonData) => {
+    setGenerated(JSON.stringify(jsonData, null, 2));
+    setShowGenerated(true);
+  };
+
   const handleDownload = () => {
     const blob = new Blob([generated], { type: "application/json" });
     const link = document.createElement("a");
@@ -24,6 +24,119 @@ const EditView = ({
     link.click();
     document.body.removeChild(link);
   };
+  const storeToLocalStorage = (data) => {
+    localStorage.setItem("stothramData", JSON.stringify(data));
+    const currentTime = new Date().toLocaleString();
+    localStorage.setItem("stothramDataSaved", currentTime);
+    return true;
+  };
+
+  const updateTitle = (title) => {
+    setData((prevData) => {
+      const newData = {
+        ...prevData,
+        title: title,
+      };
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
+  const newParagraph = (index) => {
+    setData((prevData) => {
+      const newData = { ...prevData };
+      newData?.content?.splice(index + 1, 0, {
+        type: "paragraph",
+        lines: [""],
+      });
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
+  const newSubheading = (index) => {
+    setData((prevData) => {
+      const newData = { ...prevData };
+      newData?.content?.splice(index + 1, 0, {
+        type: "subheading",
+        title: "",
+      });
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
+  const deleteItem = (index) => {
+    setData((prevData) => {
+      const newData = { ...prevData };
+      if (newData?.content && index >= 0 && index < newData.content.length) {
+        newData.content.splice(index, 1);
+      }
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
+  const newLine = (paragraphIndex) => {
+    setData((prevData) => {
+      const newData = { ...prevData };
+      const paragraph = newData?.content?.[paragraphIndex];
+      if (paragraph && paragraph.type === "paragraph") {
+        paragraph.lines.push("");
+      }
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
+  const updateLine = (paragraphIndex, lineIndex, value) => {
+    setData((prevData) => {
+      const newData = { ...prevData };
+      const paragraph = newData?.content?.[paragraphIndex];
+      if (paragraph && paragraph.type === "paragraph") {
+        if (lineIndex >= 0 && lineIndex < paragraph.lines.length) {
+          paragraph.lines[lineIndex] = value;
+        }
+      }
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
+  const deleteLine = (paragraphIndex, lineIndex) => {
+    setData((prevData) => {
+      const newData = { ...prevData };
+      const paragraph = newData?.content?.[paragraphIndex];
+      if (paragraph && paragraph.type === "paragraph") {
+        if (lineIndex >= 0 && lineIndex < paragraph.lines.length) {
+          paragraph.lines.splice(lineIndex, 1);
+        }
+      }
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
+  const updateSubHeading = (subHeadingIndex, value) => {
+    setData((prevData) => {
+      const newData = { ...prevData };
+      const subHeading = newData?.content?.[subHeadingIndex];
+      if (subHeading && subHeading.type === "subheading") {
+        subHeading.title = value;
+      }
+      storeToLocalStorage(newData);
+      return newData;
+    });
+    setShowGenerated(false);
+  };
+
   return (
     <>
       <div
@@ -43,7 +156,9 @@ const EditView = ({
         </button>
         <button
           className="w3-button w3-green w3-round-xlarge"
-          onClick={generateCode}
+          onClick={() => {
+            generateCode(data);
+          }}
         >
           Generate Code
         </button>
@@ -76,14 +191,13 @@ const EditView = ({
           <textarea className="w3-input" value={generated} />
         </div>
       </div>
-
       <div className="w3-panel" style={{ textAlign: "center" }}>
         <input
           className="w3-input"
           type="text"
           placeholder="Enter Title"
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
+          value={data?.title ? data?.title : ""}
+          onChange={(e) => updateTitle(e.target.value)}
           style={{ marginBottom: 10 }}
         />
         <div
@@ -113,97 +227,91 @@ const EditView = ({
           </button>
         </div>
       </div>
-
       <br />
-      {data?.map((p, pindex) => {
-        return (
-          <div key={pindex}>
-            <div className="w3-panel w3-pale-green">
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                {pindex + 1} -{" "}
-                {p[0].type === "paragraph" ? "Paragraph" : "Subheading"}
+      {data?.content?.map((item, index) => (
+        <div key={index} className="w3-panel w3-pale-green">
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            {index + 1} -
+            {item.type === "paragraph" ? "Paragraph" : "Subheading"}
+            <button
+              className="w3-button w3-red w3-ripple w3-tiny"
+              onClick={() => deleteItem(index)}
+            >
+              Delete
+            </button>
+          </div>
+          {item.type === "paragraph" ? (
+            <>
+              {item.lines.map((line, lineIndex) => (
+                <div key={lineIndex} style={{ display: "flex" }}>
+                  <input
+                    type="text"
+                    className="w3-input"
+                    placeholder={`Enter Line ${lineIndex + 1}`}
+                    value={line}
+                    onChange={(e) =>
+                      updateLine(index, lineIndex, e.target.value)
+                    }
+                  />
+                  <button
+                    className="w3-button w3-red w3-tiny"
+                    onClick={() => {
+                      deleteLine(index, lineIndex);
+                    }}
+                  >
+                    D
+                  </button>
+                </div>
+              ))}
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "row-reverse",
+                  marginTop: 5,
+                  marginBottom: 5,
+                }}
+              >
                 <button
-                  className="w3-button w3-red w3-ripple w3-tiny"
-                  onClick={() => {
-                    deleteParagraph(pindex);
-                  }}
+                  className="w3-button w3-khaki w3-tiny"
+                  onClick={() => newLine(index)}
+                  style={{ marginRight: 10 }}
                 >
-                  Delete
+                  New Line
                 </button>
               </div>
-            </div>
-            <div className="w3-container w3-sand">
-              {p.map((s, sindex) => {
-                return (
-                  <div key={sindex}>
-                    <div style={{ display: "flex" }}>
-                      <input
-                        className="w3-input"
-                        type="text"
-                        placeholder={`Enter ${
-                          s.type === "paragraph" || "line" ? "Line" : "Title"
-                        } ${sindex + 1}`}
-                        value={s.lines[0]}
-                        onChange={(e) => {
-                          updateLine(pindex, sindex, e.target.value);
-                        }}
-                      />
-                      {sindex > 0 ? (
-                        <button
-                          className="w3-button w3-red w3-tiny"
-                          onClick={() => {
-                            deleteLine(pindex, sindex);
-                          }}
-                        >
-                          D
-                        </button>
-                      ) : null}
-                    </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row-reverse",
-                        marginTop: 5,
-                        marginBottom: 5,
-                      }}
-                    >
-                      <>
-                        <button
-                          className="w3-button w3-lime w3-tiny"
-                          onClick={() => {
-                            newSubheading(pindex);
-                          }}
-                        >
-                          New Subheading
-                        </button>
-                        <button
-                          className="w3-button w3-indigo w3-tiny"
-                          onClick={() => {
-                            newParagraph(pindex);
-                          }}
-                          style={{ marginRight: 10 }}
-                        >
-                          New Paragraph
-                        </button>
-                        {(s.type === "paragraph" || s.type === "line") && (
-                          <button
-                            className="w3-button w3-khaki w3-tiny"
-                            onClick={() => newLine(pindex)}
-                            style={{ marginRight: 10 }}
-                          >
-                            New Line
-                          </button>
-                        )}
-                      </>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            <hr />
-          </div>
-        );
-      })}
+            </>
+          ) : (
+            <input
+              className="w3-input"
+              type="text"
+              placeholder={"Enter Subtitle"}
+              value={item.title}
+              onChange={(e) => {
+                updateSubHeading(index, e.target.value);
+              }}
+            />
+          )}
+          <>
+            <button
+              className="w3-button w3-lime w3-tiny"
+              onClick={() => {
+                newSubheading(index);
+              }}
+            >
+              New Subheading
+            </button>
+            <button
+              className="w3-button w3-indigo w3-tiny"
+              onClick={() => {
+                newParagraph(index);
+              }}
+              style={{ marginRight: 10 }}
+            >
+              New Paragraph
+            </button>
+          </>
+        </div>
+      ))}
     </>
   );
 };

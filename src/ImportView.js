@@ -1,17 +1,62 @@
-// ImportView.js
-import React from "react";
+import React, { useEffect, useState } from "react";
 
-const ImportView = ({
-  importType,
-  setImportType,
-  jsonUrl,
-  setJsonUrl,
-  localJson,
-  setLocalJson,
-  importError,
-  handleImport,
-  loading,
-}) => {
+const ImportView = ({ isValidJson, importHandler }) => {
+  const [importType, setImportType] = useState("json"); // "url" or "json"
+  const [jsonUrl, setJsonUrl] = useState("");
+  const [localJson, setLocalJson] = useState("");
+  const [importError, setImportError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [editedJson, setEditedJSON] = useState(null);
+  const [lastEditedDateTime, setLastEditedDateTime] = useState("");
+
+  const handleImport = async (json) => {
+    setLoading(true);
+    let jsonData;
+    try {
+      if (json) {
+        jsonData = JSON.parse(json);
+      } else {
+        if (importType === "url") {
+          const response = await fetch(jsonUrl);
+          if (!response.ok) {
+            throw new Error("Failed to fetch JSON data");
+          }
+          jsonData = await response.json();
+        } else if (importType === "json") {
+          jsonData = JSON.parse(localJson);
+        }
+      }
+
+      let valid = isValidJson(jsonData);
+      if (valid) {
+        importHandler(jsonData);
+
+        // Reset import view states
+        setJsonUrl("");
+        setLocalJson("");
+        setImportError("");
+
+        setLoading(false);
+      } else {
+        setImportError("Error parsing Json, Invalid format");
+        setJsonUrl("");
+        setLocalJson("");
+        setLoading(false);
+      }
+    } catch (error) {
+      setImportError(error.message);
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    let cd = localStorage.getItem("stothramData");
+    if (cd) {
+      setEditedJSON(cd);
+      const lastEditedDateTime = localStorage.getItem("stothramDataSaved");
+      setLastEditedDateTime(lastEditedDateTime);
+    }
+  }, []);
   return (
     <div
       style={{
@@ -26,6 +71,14 @@ const ImportView = ({
       <div style={{ textAlign: "center" }}>
         <button
           className={`w3-button w3-round-xlarge ${
+            importType === "json" ? "w3-blue" : ""
+          }`}
+          onClick={() => setImportType("json")}
+        >
+          JSON
+        </button>
+        <button
+          className={`w3-button w3-round-xlarge ${
             importType === "url" ? "w3-blue" : ""
           }`}
           onClick={() => setImportType("url")}
@@ -33,15 +86,22 @@ const ImportView = ({
         >
           URL
         </button>
-        <button
-          className={`w3-button w3-round-xlarge ${
-            importType === "json" ? "w3-blue" : ""
-          }`}
-          onClick={() => setImportType("json")}
-        >
-          JSON
-        </button>
       </div>
+      {editedJson && (
+        <div
+          onClick={() => handleImport(editedJson)}
+          style={{
+            cursor: "pointer",
+            color: "#3498db",
+            textAlign: "center",
+            marginTop: 10,
+            marginBottom: 10,
+            fontSize: 14,
+          }}
+        >
+          Load Last Edited Data (Last edited: {lastEditedDateTime})
+        </div>
+      )}
       {importType === "url" && (
         <div style={{ marginTop: "20px" }}>
           <label>

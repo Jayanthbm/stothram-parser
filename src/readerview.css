@@ -1,0 +1,50 @@
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+Kannada:wght@500;800&display=swap");
+
+.reader-data {
+  font-family: "Noto Sans Kannada", sans-serif;
+}
+
+.app-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #676767;
+  font-weight: bold;
+  text-align: center;
+  padding: 10px;
+  background-color: #f0ead6;
+  margin-bottom: 10px;
+}
+
+.app-header-title {
+  flex-grow: 1;
+  text-align: center;
+}
+
+.paragarph-container {
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  border-bottom-color: #cdcdcd;
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  padding-top: 10px;
+  margin-left: 10px;
+}
+
+.line {
+  font-weight: 500;
+  line-height: 1.8;
+  display: block;
+}
+
+.subheading-container {
+  padding: 10px;
+  background-color: #f0ead6;
+  margin-bottom: 5px;
+}
+
+.subheading-text {
+  font-size: 20px;
+  text-align: center;
+  font-weight: 500;
+}
