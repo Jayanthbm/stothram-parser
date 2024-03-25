@@ -1,10 +1,13 @@
 {
   "files": {
-    "main.js": "/stothram-parser/static/js/main.22c660d3.js",
+    "main.css": "/stothram-parser/static/css/main.0cf21e36.css",
+    "main.js": "/stothram-parser/static/js/main.3e465582.js",
     "index.html": "/stothram-parser/index.html",
-    "main.22c660d3.js.map": "/stothram-parser/static/js/main.22c660d3.js.map"
+    "main.0cf21e36.css.map": "/stothram-parser/static/css/main.0cf21e36.css.map",
+    "main.3e465582.js.map": "/stothram-parser/static/js/main.3e465582.js.map"
   },
   "entrypoints": [
-    "static/js/main.22c660d3.js"
+    "static/css/main.0cf21e36.css",
+    "static/js/main.3e465582.js"
   ]
 }
